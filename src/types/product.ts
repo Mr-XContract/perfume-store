@@ -15,6 +15,13 @@ export interface CinematicAsset {
   posterBlurDataURL?: string;
 }
 
+export interface ShopifyLink {
+  /** Handle used to look up this product via the Storefront API. */
+  productHandle: string;
+  /** Storefront GID of the variant to purchase — null until Shopify resolves it. */
+  variantId: string | null;
+}
+
 export interface Product {
   slug: string;
   brand: string;
@@ -25,4 +32,9 @@ export interface Product {
   price: number;
   currency: "USD";
   cinematic: CinematicAsset;
+  /**
+   * Present once this product is backed by a real Shopify product; null for
+   * the local mock. See src/lib/getFeaturedProduct.ts.
+   */
+  shopify: ShopifyLink | null;
 }

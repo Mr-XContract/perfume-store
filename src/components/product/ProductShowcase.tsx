@@ -1,9 +1,9 @@
 import type { Product } from "@/types/product";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { NotesPyramid } from "./NotesPyramid";
 import { HiggsfieldVisualizer } from "./HiggsfieldVisualizer";
+import { AddToCartButton } from "./AddToCartButton";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -39,7 +39,7 @@ export function ProductShowcase({ product }: { product: Product }) {
             <span className="font-serif text-2xl text-porcelain">
               {currencyFormatter.format(product.price)}
             </span>
-            <Button>Añadir a la bolsa</Button>
+            <AddToCartButton variantId={product.shopify?.variantId ?? null} />
           </div>
         </RevealOnScroll>
       </Container>

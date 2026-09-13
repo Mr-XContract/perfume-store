@@ -7,7 +7,7 @@ import type {
 type Variant = "primary" | "ghost";
 
 const base =
-  "inline-flex items-center justify-center gap-2 px-8 py-3 text-xs tracking-[0.2em] uppercase transition-colors duration-300 cursor-pointer";
+  "inline-flex items-center justify-center gap-2 px-8 py-3 text-xs tracking-[0.2em] uppercase transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40";
 
 const variants: Record<Variant, string> = {
   primary: "bg-gold text-ink hover:bg-gold-soft",

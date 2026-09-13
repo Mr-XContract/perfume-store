@@ -2,9 +2,11 @@ import { Hero } from "@/components/home/Hero";
 import { BrandStory } from "@/components/home/BrandStory";
 import { ProductShowcase } from "@/components/product/ProductShowcase";
 import { PerfumeAssemblyCanvasLoader } from "@/components/scrollytelling/PerfumeAssemblyCanvasLoader";
-import { featuredProduct } from "@/data/products";
+import { getFeaturedProduct } from "@/lib/getFeaturedProduct";
 
-export default function Home() {
+export default async function Home() {
+  const featuredProduct = await getFeaturedProduct();
+
   return (
     <>
       <Hero />

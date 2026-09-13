@@ -24,6 +24,7 @@ export const featuredProduct: Product = {
     videoSrc: "/videos/bleu-de-chanel-cinematic.mp4",
     posterSrc: "/images/bleu-de-chanel-poster.png",
   },
+  shopify: null,
 };
 
 export const products: Product[] = [featuredProduct];
