@@ -1,40 +1,32 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { Analytics } from "@/components/layout/Analytics";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
+const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Maison Noir — Fragancias exclusivas para caballero",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: `${siteConfig.name} — Kit deslanador para perros y gatos`,
+    template: `%s · ${siteConfig.name}`,
+  },
   description:
-    "E-commerce minimalista de alta gama para perfumes exclusivos, con visualización cinemática de producto impulsada por Higgsfield AI.",
+    "Guante de silicona y cepillo autolimpiante para retirar el pelo suelto de tu mascota. Garantía de devolución de 30 días.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-ink text-porcelain">
-        <SmoothScrollProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </SmoothScrollProvider>
+    <html lang="es" className={`${inter.variable} ${fraunces.variable} antialiased`}>
+      <body className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <Analytics />
       </body>
     </html>
   );

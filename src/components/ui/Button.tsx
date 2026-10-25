@@ -1,51 +1,27 @@
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-} from "react";
-
-type Variant = "primary" | "ghost";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 const base =
-  "inline-flex items-center justify-center gap-2 px-8 py-3 text-xs tracking-[0.2em] uppercase transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40";
-
-const variants: Record<Variant, string> = {
-  primary: "bg-gold text-ink hover:bg-gold-soft",
-  ghost:
-    "border border-porcelain/30 text-porcelain hover:border-gold hover:text-gold",
-};
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  variant?: Variant;
-}
+  "inline-flex items-center justify-center gap-2 rounded-full bg-clay px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-clay-dark cursor-pointer disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Button({
   children,
-  variant = "primary",
   className = "",
   ...props
-}: ButtonProps) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
   return (
-    <button className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <button className={`${base} ${className}`} {...props}>
       {children}
     </button>
   );
 }
 
-interface LinkButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  children: ReactNode;
-  variant?: Variant;
-}
-
 export function LinkButton({
   children,
-  variant = "primary",
   className = "",
   ...props
-}: LinkButtonProps) {
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode }) {
   return (
-    <a className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <a className={`${base} ${className}`} {...props}>
       {children}
     </a>
   );

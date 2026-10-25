@@ -1,35 +1,23 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { siteConfig } from "@/lib/site";
 
 export function Navbar() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-porcelain/10 bg-ink/70 backdrop-blur-md">
-      <Container className="flex h-20 items-center justify-between">
-        <Link
-          href="/"
-          className="font-serif text-xl tracking-[0.3em] text-porcelain"
-        >
-          MAISON&nbsp;NOIR
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur">
+      <div className="bg-moss py-2 text-center text-xs font-medium text-white">
+        Garantía de devolución de 30 días · Envío con seguimiento
+      </div>
+      <Container className="flex h-16 items-center justify-between">
+        <Link href="/" className="font-display text-2xl font-semibold text-moss">
+          {siteConfig.name}
         </Link>
-
-        <nav className="hidden gap-10 text-xs tracking-[0.2em] text-mist uppercase md:flex">
-          <Link href="#coleccion" className="hover:text-gold transition-colors">
-            Colección
-          </Link>
-          <Link href="#historia" className="hover:text-gold transition-colors">
-            La Casa
-          </Link>
-          <Link href="#contacto" className="hover:text-gold transition-colors">
-            Contacto
-          </Link>
-        </nav>
-
-        <button
-          aria-label="Abrir carrito"
-          className="text-xs tracking-[0.2em] text-porcelain uppercase hover:text-gold transition-colors"
+        <Link
+          href="/#comprar"
+          className="rounded-full bg-moss px-5 py-2 text-sm font-semibold text-white hover:bg-moss/90"
         >
-          Bolsa (0)
-        </button>
+          Comprar
+        </Link>
       </Container>
     </header>
   );
