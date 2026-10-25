@@ -9,7 +9,7 @@ declare global {
 
 /** Fires an event on whichever ad pixels are loaded; no-op otherwise. */
 export function track(
-  event: "ViewContent" | "AddToCart" | "InitiateCheckout",
+  event: "ViewContent" | "AddToCart" | "InitiateCheckout" | "Purchase",
   params: Params = {},
 ) {
   window.fbq?.("track", event, params);

@@ -1,86 +1,116 @@
-# Manada — plan de lanzamiento
+# Manada — plan de portafolio (varios mercados, varios productos)
 
-Tienda de dropshipping de **un solo producto**: kit deslanador para mascotas
-(guante de silicona + cepillo autolimpiante).
+Objetivo: no depender de un solo producto ni de un solo país. El catálogo
+(`src/data/products.ts`) y los mercados (`src/data/markets.ts`) son **datos**:
+añadir, pausar o cambiar uno no toca el código.
 
-> Todo lo numérico de este documento son **supuestos** para decidir y
-> planificar. No hay garantía de ingresos: valida con cotizaciones reales de
-> proveedor y con datos de tus propios tests.
+> Todo lo numérico son **supuestos** para planificar. No hay garantía de
+> ingresos: valida con cotizaciones reales de proveedor y con tus propios tests.
 
-## 1. Por qué este producto
+## 1. Cómo está montada la tienda
 
-Criterios aplicados: sin marca registrada, sin tallas (pocas devoluciones),
-demostrable en 5 segundos de vídeo (antes/después), compra repetida/regalo,
-precio de 20–60 USD (margen para pagar publicidad).
-
-- Mascotas: nicho citado como duradero, con baja sensibilidad al precio y
-  recompra ([Dropified](https://www.dropified.com/blog/14-most-profitable-dropshipping-niches-for-2026-low-competition-high-demand/), [Inventory Source](https://www.inventorysource.com/best-dropshipping-products-to-sell-this-year/)).
-- Rango 20–100 USD como zona con margen suficiente tras publicidad ([TrueProfit](https://trueprofit.io/blog/dropshipping-products-with-high-profit-margin)).
-- Objetivo mínimo de margen bruto ~40% antes de publicidad ([Ecommerce Fastlane](https://ecommercefastlane.com/how-to-find-winning-dropshipping-niches/)).
-- Riesgos: producto muy copiado (diferénciate con marca, oferta, creatividades) y
-  fuentes que son vendedores de herramientas: tómalas como orientativas.
-
-Descartado: perfumes de marca (marcas registradas → cierre de anuncios y
-reclamaciones).
-
-## 2. Economía unitaria (supuestos a validar)
-
-| Opción | Precio | Coste proveedor + envío (supuesto) | Margen antes de ads |
+| Mercado | Moneda | Pago | Entrega (supuesto) |
 |---|---|---|---|
-| Guante | 19,90 | ~6 | ~13,90 |
-| Kit completo | 34,90 | ~10 | ~24,90 |
-| Pack 2 kits | 59,90 | ~20 | ~39,90 |
+| Colombia `/co` | COP | Contra entrega | 2–5 días |
+| México `/mx` | MXN | Contra entrega | 3–7 días |
+| España `/es` | EUR | Tarjeta (Shopify) | 7–15 días |
 
-Con un pedido medio de ~38 USD y ~11 USD de margen tras comisiones de pago
-(~3–4%) y publicidad a un CPA objetivo ≤ 15 USD el **margen es ajustado**:
-la palanca es subir el AOV (pack, bundles, upsell post-compra) y bajar el CPA
-con creatividades.
+- `/` redirige al mercado del país del visitante (cabecera de Vercel); el resto va a Colombia.
+- **Precios:** parten de un precio base en USD × tipo de cambio × `priceIndex`
+  (poder adquisitivo) y se redondean a precios psicológicos. Sin `priceIndex`,
+  Colombia quedaba en ~140.000 COP para una compra por impulso. Calibra los
+  tres valores con tus tests.
+- **Contra entrega:** el formulario manda el pedido a `ORDER_WEBHOOK_URL`
+  (Make, Zapier, Google Sheets o integración con Dropi). El total se recalcula
+  en el servidor. Un equipo debe **llamar/escribir por WhatsApp para confirmar**
+  antes de enviar.
+- **Tarjeta:** checkout alojado de Shopify. El precio mostrado es el nuestro
+  salvo que Shopify devuelva la misma moneda; no se mezclan monedas.
+- Políticas, plazos y textos legales se generan por mercado
+  (`src/data/policies.ts`). Son un borrador: revísalos con asesor legal local
+  (retracto y consumo difieren entre CO, MX y ES).
 
-### Qué implica llegar a 15.000 USD/mes de beneficio
+## 2. Portafolio inicial: 3 productos × 3 mercados
 
-Con ~20 USD de beneficio neto por pedido (tras producto, comisiones y ads),
-son ~750 pedidos/mes (~25/día). Con conversión de 1,5–2% eso son 40–50 mil
-visitas/mes. Es un objetivo de escala (meses), no de lanzamiento.
+Los tres productos son **candidatos a validar**, no apuestas; ninguno es
+suplemento ni promete resultados de salud (riesgo de rechazo de anuncios y
+registro sanitario).
 
-## 3. Pasos previos (los haces tú; yo no tengo acceso)
+| Producto | Por qué entra | Riesgo |
+|---|---|---|
+| Kit deslanador mascotas | Demostrable en vídeo, recompra/regalo | Muy copiado: diferénciate con oferta y creatividades |
+| Set gua sha + rodillo | Margen alto, regalo | Evitar toda promesa estética/médica |
+| Soporte magnético auto | Ligero, pocas devoluciones | Producto muy común: pelea por precio |
 
-1. Cuenta de Shopify. Crear el producto con handle `kit-deslanador` y 3
-   variantes con título exacto: `Guante`, `Kit completo`, `Pack 2 kits`.
-2. Token de Storefront API → `.env.local` (ver `.env.example`).
-3. Proveedor: pedir muestras de 2–3 (CJ, Spocket, Zendrop o fábrica directa).
-   Verificar: plazo real, material de silicona, seguimiento, packaging neutro.
-   **Ajusta la página de envíos al plazo real** (`src/data/policies.ts`).
-4. Datos legales: razón social/dirección, correo de soporte
-   (`NEXT_PUBLIC_SUPPORT_EMAIL`), revisión legal de las políticas.
-5. Dominio + despliegue en Vercel.
-6. Fotos/vídeo reales: sustituir `ProductVisual` por imágenes del producto.
-7. Crear píxeles Meta/TikTok → `NEXT_PUBLIC_META_PIXEL_ID` / `..._TIKTOK_PIXEL_ID`.
+Fuentes de la selección:
+[TrueProfit](https://trueprofit.io/blog/dropshipping-products-with-high-profit-margin),
+[Inventory Source](https://www.inventorysource.com/best-dropshipping-products-to-sell-this-year/),
+[Dropified](https://www.dropified.com/blog/14-most-profitable-dropshipping-niches-for-2026-low-competition-high-demand/),
+[Ecommerce Fastlane](https://ecommercefastlane.com/how-to-find-winning-dropshipping-niches/).
+(Blogs de vendedores de herramientas: orientativas.)
 
-## 4. Testing publicitario (semanas 1–4)
+## 3. Método del vídeo, adaptado
 
-- Presupuesto de prueba: 30–50 USD/día repartidos en 3–4 creatividades.
-- Plataformas: Meta (principal) y TikTok (vídeo).
-- Ángulos a probar: (1) antes/después en sofá/ropa, (2) "se siente como una
-  caricia" (reacción de la mascota), (3) limpieza con un botón, (4) regalo para
-  amantes de mascotas.
-- Formato: UGC en vídeo vertical 15–30 s, gancho en los primeros 2 s. Prefiere
-  tomas reales del producto probado con mascotas; no inventes testimonios ni
-  reseñas.
-- Criterios de decisión tras ~2.000–3.000 USD de gasto o 7 días por creatividad:
-  CPA ≤ 15 USD y ROAS ≥ ~2,3 → escalar un 20–30% cada 2–3 días; peor → matar
-  creatividad. Si ningún ángulo sale tras 3–4 rondas, cambiar de producto.
+1. **Producto con datos** — en Dropi (CO/MX) filtra por *ventas últimas 7 días*,
+   stock y precio de proveedor. Pasa los candidatos a `products.ts` con
+   `status: "test"`. Exige: sin promesas de salud, margen bruto ≥ 40% tras
+   proveedor + flete + tasa de rechazo de contra entrega.
+2. **Anuncio con datos** — en Adskiller / Biblioteca de anuncios de Meta busca
+   anuncios activos **más de 60–77 días** del producto: es la señal de que
+   alguien sigue pagando por ellos. Extrae **ángulo, gancho y formato**, no el
+   material: no copies vídeos, fotos ni textos ajenos (derechos de autor y
+   políticas de Meta).
+3. **Campaña** — crear siempre **en pausa** y activarla tú. Con un conector
+   (p. ej. Adspirer) puedo preparar la campaña; el gasto lo apruebas tú.
 
-## 5. Reglas que se han respetado en la web
+## 4. Cómo no diluir el presupuesto
 
-- Sin reseñas, contadores de urgencia ni stock falso. Añade reseñas **solo
-  reales**, cuando existan.
-- Sin precio "antes" inventado: el tachado del pack es la suma real de 2 kits.
+Nueve combinaciones a 30 USD/día cada una son 270 USD/día: no hace falta. Las
+fases son:
+
+1. **Semana 1–2 — 1 mercado barato (CO o MX) × 3 productos**, 10–15 USD/día por
+   producto, 2–3 creatividades cada uno. Se decide por **CPA y tasa de
+   confirmación**, no por clics.
+2. **Semana 3–4 — el mejor producto en el 2.º mercado**, y los otros dos solo si
+   mantienen CPA objetivo.
+3. **Escalar** lo que funcione un 20–30% cada 2–3 días; **pausar** lo que no
+   (`status: "paused"`) y meter un producto nuevo del ranking de Dropi.
+4. España (tarjeta) entra cuando haya un ganador demostrado: tiene CPM más alto
+   y menos margen por envío largo.
+
+Reglas de corte (ajústalas al margen real): tras ~2–3× el precio de venta en
+gasto sin pedidos confirmados, matar la creatividad; si ningún ángulo funciona
+tras 3–4 rondas, cambiar de producto.
+
+## 5. Contra entrega: qué vigilar
+
+- **Tasa de confirmación y de entrega** (supuesto de partida: 60–75% de los
+  pedidos acaban entregados). Un CPA bueno sobre pedidos no confirmados engaña.
+- El evento `Purchase` se dispara al **registrar** el pedido (sirve para
+  optimizar anuncios). Los cancelados no se descuentan solos: lleva tu propio
+  recuento de entregas.
+- Reembolso de contra entrega = transferencia bancaria.
+
+## 6. Reglas respetadas en la web
+
+- Sin reseñas, contadores de urgencia ni stock falsos. Añade reseñas **solo reales**.
+- Sin precio "antes" inventado: el tachado del pack es la suma real de comprar
+  las unidades sueltas.
 - Sin promesas médicas ni cifras de eficacia no demostradas.
-- Pago siempre en el checkout alojado de Shopify.
+- Pagos con tarjeta solo en el checkout alojado de Shopify.
 
-## 6. Pendiente de construir (siguiente iteración)
+## 7. Pasos previos (los haces tú)
 
-- Reseñas reales (app de Shopify o propias) y fotos de clientes.
-- Upsell/cross-sell post-compra y email de carrito abandonado (Klaviyo).
-- Conversions API de Meta/TikTok del lado servidor.
-- Variantes por tipo de mascota/pelo si los datos lo justifican.
+1. Shopify: productos con los handles y títulos de variante exactos de
+   `products.ts` (solo para mercados con tarjeta) + token → `.env.local`.
+2. `ORDER_WEBHOOK_URL` para contra entrega + una persona/proceso que confirme pedidos.
+3. Proveedor por producto y mercado: muestras, plazo y coste reales →
+   ajustar `markets.ts`/`products.ts` y las políticas.
+4. Razón social, correo de soporte (`NEXT_PUBLIC_SUPPORT_EMAIL`), dominio, revisión legal.
+5. Fotos y vídeo reales (sustituir `ProductVisual`).
+6. Píxeles Meta/TikTok (`NEXT_PUBLIC_*_PIXEL_ID`).
+
+## 8. Siguiente iteración
+
+Reseñas reales, carrito abandonado, Conversions API de servidor, subtotales
+con envío por ciudad, y mercados nuevos (basta con una entrada en `markets.ts`).

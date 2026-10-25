@@ -11,10 +11,7 @@ export default function ContactPage() {
       <p className="mt-4 text-mist">
         Escríbenos con tu número de pedido y respondemos en un máximo de 2 días hábiles.
       </p>
-      <a
-        className="mt-6 inline-block text-lg font-semibold text-moss underline"
-        href={`mailto:${siteConfig.supportEmail}`}
-      >
+      <a className="mt-6 inline-block text-lg font-semibold text-moss underline" href={`mailto:${siteConfig.supportEmail}`}>
         {siteConfig.supportEmail}
       </a>
     </Container>
