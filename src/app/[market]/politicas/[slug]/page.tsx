@@ -1,27 +1,33 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
-import { isMarketCode, marketCodes, markets } from "@/data/markets";
+import { isMarketCode, markets } from "@/data/markets";
 import { getPolicies, policySlugs, type PolicySlug } from "@/data/policies";
+import { getSite, paymentMethods, siteMarketCodes } from "@/sites";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return marketCodes.flatMap((market) => policySlugs.map((slug) => ({ market, slug })));
+  return siteMarketCodes(getSite()).flatMap((market) => policySlugs.map((slug) => ({ market, slug })));
 }
 
 const isPolicySlug = (s: string): s is PolicySlug => (policySlugs as readonly string[]).includes(s);
 
+function load(code: string, slug: string) {
+  const site = getSite();
+  if (!isMarketCode(code) || !(code in site.markets) || !isPolicySlug(slug)) return null;
+  return getPolicies(markets[code], paymentMethods(site, code))[slug];
+}
+
 export async function generateMetadata({ params }: PageProps<"/[market]/politicas/[slug]">): Promise<Metadata> {
   const { market, slug } = await params;
-  if (!isMarketCode(market) || !isPolicySlug(slug)) return {};
-  return { title: getPolicies(markets[market])[slug].title };
+  return { title: load(market, slug)?.title };
 }
 
 export default async function PolicyPage({ params }: PageProps<"/[market]/politicas/[slug]">) {
-  const { market: code, slug } = await params;
-  if (!isMarketCode(code) || !isPolicySlug(slug)) notFound();
-  const policy = getPolicies(markets[code])[slug];
+  const { market, slug } = await params;
+  const policy = load(market, slug);
+  if (!policy) notFound();
 
   return (
     <Container className="max-w-3xl py-14">

@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
+/*
+  Los colores de marca (brand, accent, accent-dark, cream, sand) los
+  sobrescribe cada web desde su config (src/sites/*) con estilos en <html>;
+  estos valores son solo el respaldo.
+*/
 :root {
-  --color-cream: #faf6ef;   /* fondo principal */
-  --color-sand: #efe6d6;    /* paneles / secciones alternas */
-  --color-ink: #1f2a24;     /* texto principal */
-  --color-mist: #5f675f;    /* texto secundario */
-  --color-moss: #2f5d46;    /* marca */
-  --color-clay: #c8602a;    /* CTA */
-  --color-clay-dark: #a84d1f;
+  --color-cream: #faf6ef;
+  --color-sand: #efe6d6;
+  --color-ink: #1f2a24;
+  --color-mist: #5f675f;
+  --color-brand: #2f5d46;
+  --color-accent: #c8602a;
+  --color-accent-dark: #a84d1f;
 }
 
 @theme inline {
@@ -15,9 +20,9 @@
   --color-sand: var(--color-sand);
   --color-ink: var(--color-ink);
   --color-mist: var(--color-mist);
-  --color-moss: var(--color-moss);
-  --color-clay: var(--color-clay);
-  --color-clay-dark: var(--color-clay-dark);
+  --color-brand: var(--color-brand);
+  --color-accent: var(--color-accent);
+  --color-accent-dark: var(--color-accent-dark);
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-fraunces);

@@ -1,32 +1,41 @@
-import Link from "next/link";
+import { Brand } from "@/components/layout/Brand";
 import { Container } from "@/components/ui/Container";
-import { marketCodes, markets, type Market } from "@/data/markets";
-import { siteConfig } from "@/lib/site";
+import { markets, type MarketCode } from "@/data/markets";
+import { formatDelivery, ui } from "@/lib/i18n";
+import { paymentMethods, siteMarketCodes } from "@/sites";
+import type { SiteConfig } from "@/sites/types";
+import Link from "next/link";
 
-export function Navbar({ market }: { market: Market }) {
+export function Navbar({ site, market: code }: { site: SiteConfig; market: MarketCode }) {
+  const market = markets[code];
+  const t = ui[market.lang];
+  const methods = paymentMethods(site, code);
+  const others = siteMarketCodes(site);
+
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur">
-      <div className="bg-moss py-2 text-center text-xs font-medium text-white">
-        {market.payment === "cod" ? "Pagas al recibir" : "Pago seguro"} · Garantía de 30 días · Envíos a {market.name}
+      <div className="bg-brand py-2 text-center text-xs font-medium text-white">
+        {methods.includes("cod") ? t.codBanner : t.cardBanner} · {t.guarantee} · {t.shipsTo} {market.name}
+        <span className="sr-only"> ({formatDelivery(market)})</span>
       </div>
       <Container className="flex h-16 items-center justify-between">
-        <Link href={`/${market.code}`} className="font-display text-2xl font-semibold text-moss">
-          {siteConfig.name}
-        </Link>
-        <nav aria-label="País" className="flex items-center gap-1 text-sm">
-          {marketCodes.map((code) => (
-            <Link
-              key={code}
-              href={`/${code}`}
-              aria-current={code === market.code ? "true" : undefined}
-              className={`rounded-full px-3 py-1.5 font-medium ${
-                code === market.code ? "bg-moss text-white" : "text-mist hover:text-ink"
-              }`}
-            >
-              {markets[code].country}
-            </Link>
-          ))}
-        </nav>
+        <Brand site={site} href={`/${code}`} />
+        {others.length > 1 && (
+          <nav aria-label="País / Country" className="flex items-center gap-1 text-sm">
+            {others.map((c) => (
+              <Link
+                key={c}
+                href={`/${c}`}
+                aria-current={c === code ? "true" : undefined}
+                className={`rounded-full px-3 py-1.5 font-medium ${
+                  c === code ? "bg-brand text-white" : "text-mist hover:text-ink"
+                }`}
+              >
+                {markets[c].country}
+              </Link>
+            ))}
+          </nav>
+        )}
       </Container>
     </header>
   );

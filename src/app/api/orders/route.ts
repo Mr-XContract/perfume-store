@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isMarketCode, markets } from "@/data/markets";
-import { getProductBySlug } from "@/data/products";
 import { priceFor } from "@/lib/pricing";
+import { getSite, paymentMethods } from "@/sites";
 
 interface OrderBody {
   market?: string;
-  productSlug?: string;
   variantKey?: string;
   name?: string;
   phone?: string;
@@ -22,7 +21,7 @@ const text = (value: unknown, max: number) =>
 /**
  * Receives a cash-on-delivery order and forwards it to ORDER_WEBHOOK_URL
  * (Make/Zapier/Google Sheets/Dropi integration…). The price is always
- * recomputed here from the catalog; the client's number is never trusted.
+ * recomputed here from the site config; the client's number is never trusted.
  */
 export async function POST(request: NextRequest) {
   const webhook = process.env.ORDER_WEBHOOK_URL;
@@ -39,17 +38,15 @@ export async function POST(request: NextRequest) {
   // Pretend success to bots so they don't learn the honeypot exists.
   if (body.website) return NextResponse.json({ ok: true });
 
+  const site = getSite();
   const marketCode = text(body.market, 4);
-  if (!isMarketCode(marketCode) || markets[marketCode].payment !== "cod") {
+  if (!isMarketCode(marketCode) || !paymentMethods(site, marketCode).includes("cod")) {
     return NextResponse.json({ error: "Mercado no válido" }, { status: 400 });
   }
   const market = markets[marketCode];
 
-  const product = getProductBySlug(text(body.productSlug, 80));
-  const variant = product?.variants.find((v) => v.key === text(body.variantKey, 80));
-  if (!product || !variant) {
-    return NextResponse.json({ error: "Producto no válido" }, { status: 400 });
-  }
+  const variant = site.product.variants.find((v) => v.key === text(body.variantKey, 40));
+  if (!variant) return NextResponse.json({ error: "Producto no válido" }, { status: 400 });
 
   const name = text(body.name, 100);
   const phone = text(body.phone, 30);
@@ -62,13 +59,14 @@ export async function POST(request: NextRequest) {
 
   const order = {
     createdAt: new Date().toISOString(),
+    site: site.id,
     market: market.code,
     country: market.country,
     currency: market.currency,
     paymentMethod: "cod",
-    product: product.name,
-    productSlug: product.slug,
-    variant: variant.key,
+    product: site.product.copy.es.name,
+    variant: variant.label.es,
+    variantKey: variant.key,
     total: priceFor(market, variant.baseUsd),
     customer: { name, phone, address, city, notes: text(body.notes, 300) },
   };
@@ -79,8 +77,6 @@ export async function POST(request: NextRequest) {
     body: JSON.stringify(order),
   }).catch(() => null);
 
-  if (!res?.ok) {
-    return NextResponse.json({ error: "No pudimos registrar tu pedido" }, { status: 502 });
-  }
+  if (!res?.ok) return NextResponse.json({ error: "No pudimos registrar tu pedido" }, { status: 502 });
   return NextResponse.json({ ok: true, total: order.total });
 }

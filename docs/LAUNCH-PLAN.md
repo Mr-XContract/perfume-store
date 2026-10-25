@@ -1,116 +1,135 @@
-# Manada — plan de portafolio (varios mercados, varios productos)
+# Plan: una web one-page por producto
 
-Objetivo: no depender de un solo producto ni de un solo país. El catálogo
-(`src/data/products.ts`) y los mercados (`src/data/markets.ts`) son **datos**:
-añadir, pausar o cambiar uno no toca el código.
+Cada producto ganador tiene **su propia web de una página**, con su marca,
+logo, colores, mercados y métodos de pago. No hay catálogo compartido: lo que
+funciona se despliega como una tienda independiente, y lo que no, se descarta
+sin afectar a las demás.
 
 > Todo lo numérico son **supuestos** para planificar. No hay garantía de
 > ingresos: valida con cotizaciones reales de proveedor y con tus propios tests.
 
-## 1. Cómo está montada la tienda
+## 1. Cómo está montado
 
-| Mercado | Moneda | Pago | Entrega (supuesto) |
-|---|---|---|---|
-| Colombia `/co` | COP | Contra entrega | 2–5 días |
-| México `/mx` | MXN | Contra entrega | 3–7 días |
-| España `/es` | EUR | Tarjeta (Shopify) | 7–15 días |
+- **Un repositorio, muchas webs.** Cada web es un archivo `src/sites/<id>.ts`
+  (marca, colores, logo, producto, variantes, textos, mercados y pagos).
+- **Un despliegue por web:** un proyecto de Vercel por web con la variable
+  `SITE_ID=<id>` y su propio dominio. Los píxeles, el webhook y el correo de
+  soporte también son por proyecto.
+- **Crear una web nueva:** `npm run new-site -- <id> "<Marca>" [slug]`, completar
+  el archivo generado y registrar el proyecto en Vercel.
+- **Mercados** (`src/data/markets.ts`): CO, MX, VE, ES, US. Cada web activa los
+  que quiera y define el método de pago de cada uno. US se sirve en inglés
+  (la web debe traer texto `en`; si no, no arranca).
+- **Pagos por mercado** (el primero de la lista es el predeterminado; con
+  varios, el cliente elige):
+  - `cod` — contra entrega: el pedido va a `ORDER_WEBHOOK_URL` y un humano
+    confirma por teléfono/WhatsApp antes de enviar.
+  - `card` — tarjeta con **Stripe Checkout** (página alojada por Stripe; esta
+    web no ve datos de tarjeta). Sin tienda de Shopify por producto.
+  - El importe se recalcula siempre en el servidor, nunca se confía en el cliente.
+- **Precios:** base en USD × tipo de cambio × `priceIndex` (poder adquisitivo),
+  redondeados a precios psicológicos. Calibra `fx` y `priceIndex` con tests.
+- **Entrada:** `/` redirige al mercado del país del visitante dentro de los
+  mercados de esa web; si no está, va al predeterminado.
+- Políticas, plazos y textos legales se generan por mercado e idioma
+  (`src/data/policies.ts`). Son un borrador: revísalos con asesor legal local.
 
-- `/` redirige al mercado del país del visitante (cabecera de Vercel); el resto va a Colombia.
-- **Precios:** parten de un precio base en USD × tipo de cambio × `priceIndex`
-  (poder adquisitivo) y se redondean a precios psicológicos. Sin `priceIndex`,
-  Colombia quedaba en ~140.000 COP para una compra por impulso. Calibra los
-  tres valores con tus tests.
-- **Contra entrega:** el formulario manda el pedido a `ORDER_WEBHOOK_URL`
-  (Make, Zapier, Google Sheets o integración con Dropi). El total se recalcula
-  en el servidor. Un equipo debe **llamar/escribir por WhatsApp para confirmar**
-  antes de enviar.
-- **Tarjeta:** checkout alojado de Shopify. El precio mostrado es el nuestro
-  salvo que Shopify devuelva la misma moneda; no se mezclan monedas.
-- Políticas, plazos y textos legales se generan por mercado
-  (`src/data/policies.ts`). Son un borrador: revísalos con asesor legal local
-  (retracto y consumo difieren entre CO, MX y ES).
+## 2. Webs creadas (candidatos a validar)
 
-## 2. Portafolio inicial: 3 productos × 3 mercados
-
-Los tres productos son **candidatos a validar**, no apuestas; ninguno es
-suplemento ni promete resultados de salud (riesgo de rechazo de anuncios y
-registro sanitario).
-
-| Producto | Por qué entra | Riesgo |
+| Web | Producto | Mercados |
 |---|---|---|
-| Kit deslanador mascotas | Demostrable en vídeo, recompra/regalo | Muy copiado: diferénciate con oferta y creatividades |
-| Set gua sha + rodillo | Margen alto, regalo | Evitar toda promesa estética/médica |
-| Soporte magnético auto | Ligero, pocas devoluciones | Producto muy común: pelea por precio |
+| `manada` | Kit deslanador para mascotas | CO, MX, VE (contra entrega) · ES, US (tarjeta) |
+| `calma` | Set gua sha + rodillo | CO, MX, VE (contra entrega) · ES (tarjeta) |
+| `rumbo` | Soporte magnético para auto | CO, MX, VE (contra entrega) · ES (tarjeta) |
 
-Fuentes de la selección:
-[TrueProfit](https://trueprofit.io/blog/dropshipping-products-with-high-profit-margin),
-[Inventory Source](https://www.inventorysource.com/best-dropshipping-products-to-sell-this-year/),
-[Dropified](https://www.dropified.com/blog/14-most-profitable-dropshipping-niches-for-2026-low-competition-high-demand/),
-[Ecommerce Fastlane](https://ecommercefastlane.com/how-to-find-winning-dropshipping-niches/).
-(Blogs de vendedores de herramientas: orientativas.)
+Los nombres de marca y colores son provisionales. Ninguno es suplemento ni
+promete resultados de salud.
 
-## 3. Método del vídeo, adaptado
+### Cómo evaluar un producto nuevo (p. ej. un limpiador de oídos)
 
-1. **Producto con datos** — en Dropi (CO/MX) filtra por *ventas últimas 7 días*,
-   stock y precio de proveedor. Pasa los candidatos a `products.ts` con
-   `status: "test"`. Exige: sin promesas de salud, margen bruto ≥ 40% tras
-   proveedor + flete + tasa de rechazo de contra entrega.
+1. Márgenes: ≥ 40% bruto tras proveedor, flete y la tasa de rechazo de contra entrega.
+2. **Riesgo de política y de producto:** lo que se introduce en el cuerpo, los
+   dispositivos con "cámara para oídos" y todo lo que promete salud o
+   eliminar cera/patologías tienen restricciones de anuncios y riesgo de
+   lesiones y devoluciones. Se puede vender como accesorio de higiene con
+   copy neutro, pero conviene validarlo con las políticas de Meta/TikTok antes
+   de invertir.
+3. Demostrable en vídeo, sin tallas, con anuncios de la competencia activos
+   hace 60+ días.
+
+## 3. Método de investigación (adaptado del vídeo)
+
+1. **Producto con datos** — en Dropi (CO/MX/otros) filtra por ventas de los
+   últimos 7 días, stock y precio de proveedor.
 2. **Anuncio con datos** — en Adskiller / Biblioteca de anuncios de Meta busca
-   anuncios activos **más de 60–77 días** del producto: es la señal de que
-   alguien sigue pagando por ellos. Extrae **ángulo, gancho y formato**, no el
-   material: no copies vídeos, fotos ni textos ajenos (derechos de autor y
-   políticas de Meta).
-3. **Campaña** — crear siempre **en pausa** y activarla tú. Con un conector
-   (p. ej. Adspirer) puedo preparar la campaña; el gasto lo apruebas tú.
+   anuncios activos **más de 60–77 días**. Extrae **ángulo, gancho y formato**;
+   no copies vídeos, fotos ni textos ajenos.
+3. **Web + creatividades + campaña** — se crea la web del producto, se generan
+   creatividades propias (Higgsfield) y la campaña se prepara **siempre en
+   pausa** para que la actives tú.
 
 ## 4. Cómo no diluir el presupuesto
 
-Nueve combinaciones a 30 USD/día cada una son 270 USD/día: no hace falta. Las
-fases son:
+Fases por web, no todas a la vez:
 
-1. **Semana 1–2 — 1 mercado barato (CO o MX) × 3 productos**, 10–15 USD/día por
-   producto, 2–3 creatividades cada uno. Se decide por **CPA y tasa de
-   confirmación**, no por clics.
-2. **Semana 3–4 — el mejor producto en el 2.º mercado**, y los otros dos solo si
-   mantienen CPA objetivo.
-3. **Escalar** lo que funcione un 20–30% cada 2–3 días; **pausar** lo que no
-   (`status: "paused"`) y meter un producto nuevo del ranking de Dropi.
-4. España (tarjeta) entra cuando haya un ganador demostrado: tiene CPM más alto
-   y menos margen por envío largo.
+1. **Semana 1–2:** un mercado barato (CO o MX) por producto, 10–15 USD/día,
+   2–3 creatividades. Se decide por **CPA y tasa de confirmación**, no por clics.
+2. **Semana 3–4:** el mejor producto pasa al segundo mercado; los demás solo si
+   mantienen el CPA objetivo.
+3. **Escalar** un 20–30% cada 2–3 días lo que funcione; **retirar** lo que no
+   y abrir la web de un producto nuevo.
+4. US y ES (tarjeta) entran con un ganador demostrado: CPM más alto.
 
-Reglas de corte (ajústalas al margen real): tras ~2–3× el precio de venta en
-gasto sin pedidos confirmados, matar la creatividad; si ningún ángulo funciona
-tras 3–4 rondas, cambiar de producto.
+Corte: tras ~2–3× el precio de venta en gasto sin pedidos confirmados, matar la
+creatividad; sin ángulo ganador tras 3–4 rondas, cambiar de producto.
 
 ## 5. Contra entrega: qué vigilar
 
-- **Tasa de confirmación y de entrega** (supuesto de partida: 60–75% de los
-  pedidos acaban entregados). Un CPA bueno sobre pedidos no confirmados engaña.
-- El evento `Purchase` se dispara al **registrar** el pedido (sirve para
-  optimizar anuncios). Los cancelados no se descuentan solos: lleva tu propio
-  recuento de entregas.
+- **Tasa de confirmación y de entrega** (supuesto: 60–75% de entregados). Un CPA
+  bueno sobre pedidos no confirmados engaña.
+- `Purchase` se dispara al **registrar** el pedido; los cancelados no se
+  descuentan solos: lleva tu propio recuento.
 - Reembolso de contra entrega = transferencia bancaria.
+- Venezuela: tratar como USD en efectivo/transferencia confirmada por WhatsApp;
+  valida con tu operador logístico qué métodos acepta antes de anunciar.
 
-## 6. Reglas respetadas en la web
+## 6. Reglas respetadas en las webs
 
-- Sin reseñas, contadores de urgencia ni stock falsos. Añade reseñas **solo reales**.
-- Sin precio "antes" inventado: el tachado del pack es la suma real de comprar
-  las unidades sueltas.
+- Sin reseñas, contadores de urgencia ni stock falsos (añade reseñas **solo reales**).
+- Sin precio "antes" inventado: el tachado del pack es comprar las unidades sueltas.
 - Sin promesas médicas ni cifras de eficacia no demostradas.
-- Pagos con tarjeta solo en el checkout alojado de Shopify.
+- Tarjeta solo en la página alojada de Stripe.
 
-## 7. Pasos previos (los haces tú)
+## 7. Conexiones y datos necesarios
 
-1. Shopify: productos con los handles y títulos de variante exactos de
-   `products.ts` (solo para mercados con tarjeta) + token → `.env.local`.
-2. `ORDER_WEBHOOK_URL` para contra entrega + una persona/proceso que confirme pedidos.
-3. Proveedor por producto y mercado: muestras, plazo y coste reales →
-   ajustar `markets.ts`/`products.ts` y las políticas.
-4. Razón social, correo de soporte (`NEXT_PUBLIC_SUPPORT_EMAIL`), dominio, revisión legal.
-5. Fotos y vídeo reales (sustituir `ProductVisual`).
-6. Píxeles Meta/TikTok (`NEXT_PUBLIC_*_PIXEL_ID`).
+**Ya conectadas en esta sesión:** GitHub, Vercel, Higgsfield.
+
+**Prioridad 1 — para empezar a vender**
+- Cuenta de **Stripe** (conector disponible en claude.ai) o PayPal, para
+  mercados con tarjeta. Requiere una entidad en un país soportado; confirma que
+  tu cuenta acepta cobrar en USD/EUR/MXN.
+- **Webhook de pedidos** para contra entrega: Make o Zapier (conectores
+  disponibles) o Google Sheets. Define `ORDER_WEBHOOK_URL`.
+- **Dominio** por web y proyecto de Vercel por web (puedo crearlos con el
+  conector de Vercel; la compra de dominios la apruebas tú).
+- Datos del negocio: razón social/dirección, correo de soporte, WhatsApp.
+
+**Prioridad 2 — para investigar y anunciar**
+- **Dropi y Adskiller:** no hay conector público. Si tu versión del vídeo usa
+  un MCP propio, dame su URL para añadirlo como conector personalizado; si no,
+  exporta tablas/capturas del ranking y de los anuncios.
+- **Meta Ads y TikTok Ads:** conector Adspirer (Meta + TikTok, crea campañas en
+  pausa) o AdWhispr (investiga anuncios de competencia). Para solo leer métricas:
+  Supermetrics o Windsor.ai. Necesitas Business Manager, cuenta publicitaria,
+  píxel y dominio verificado.
+
+**Prioridad 3 — operación**
+- Google Sheets (registro de pedidos y entregas) y un canal de WhatsApp para
+  confirmar pedidos (Bird, o manual al principio).
+- Logo y fotos/vídeo reales del producto: sustituir `ProductVisual` y añadir
+  `brand.logo` en la config de la web.
 
 ## 8. Siguiente iteración
 
-Reseñas reales, carrito abandonado, Conversions API de servidor, subtotales
-con envío por ciudad, y mercados nuevos (basta con una entrada en `markets.ts`).
+Reseñas reales, carrito abandonado, Conversions API de servidor, tabla de envío
+por ciudad, y un generador de web más completo (importar producto de Dropi).
